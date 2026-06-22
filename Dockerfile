@@ -19,7 +19,7 @@ ENV EVIDENCE_SOURCE__important_db__database=$EVIDENCE_SOURCE__important_db__data
 ENV EVIDENCE_SOURCE__important_db__user=$EVIDENCE_SOURCE__important_db__user
 ENV EVIDENCE_SOURCE__important_db__password=$EVIDENCE_SOURCE__important_db__password
 
-RUN --network=coolify npm run sources
+RUN --network=host npm run sources
 RUN npm run build:strict
 
 FROM node:18-alpine AS runtime
