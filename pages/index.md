@@ -1,5 +1,6 @@
 ---
 title: Dashboard Finansowy — Important
+redirect: /przeglad
 ---
 
 ```sql pnl_current
