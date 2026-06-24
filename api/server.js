@@ -103,6 +103,7 @@ app.post('/chat', async (req, res) => {
   }
 });
 
+app.get('/', (_, res) => res.json({ service: 'important-chat-api', status: 'ok' }));
 app.get('/health', (_, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3001;
