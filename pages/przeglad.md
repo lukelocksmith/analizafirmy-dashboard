@@ -2,6 +2,7 @@
   import { tick } from 'svelte';
 
   const CHAT_API = 'https://chat-api.important.is';
+  const CHAT_KEY = '60801407a6271c582363b2dca48c2ea102e8196be8e66ca6';
 
   let chatOpen = false;
   let msgs = [];
@@ -24,8 +25,8 @@
     try {
       const r = await fetch(`${CHAT_API}/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: msgs })
+        body: JSON.stringify({ messages: msgs }),
+        headers: { 'Content-Type': 'application/json', 'x-api-key': CHAT_KEY }
       });
       const d = await r.json();
       msgs = [...msgs, { role: 'assistant', content: d.answer || d.error || 'Błąd odpowiedzi' }];

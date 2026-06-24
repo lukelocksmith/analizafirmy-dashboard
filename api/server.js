@@ -70,7 +70,12 @@ async function buildContext() {
   return lines.join('\n');
 }
 
+const CHAT_API_KEY = process.env.CHAT_API_KEY;
+
 app.post('/chat', async (req, res) => {
+  if (CHAT_API_KEY && req.headers['x-api-key'] !== CHAT_API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   const { messages } = req.body;
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Brak wiadomości' });
