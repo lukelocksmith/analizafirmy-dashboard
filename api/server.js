@@ -28,8 +28,8 @@ async function buildContext() {
       ORDER BY przychod DESC
     `),
     pool.query(`
-      SELECT klient, ltv_total::int, status_klienta
-      FROM v_client_ltv ORDER BY ltv_total DESC LIMIT 20
+      SELECT klient, ltv::int, status_klienta
+      FROM v_client_ltv ORDER BY ltv DESC LIMIT 20
     `),
     pool.query(`
       SELECT klient, kwota_netto::int, dni_po_terminie, termin::text
@@ -56,7 +56,7 @@ async function buildContext() {
     ...clients.rows.map(r => `  ${r.klient}: ${r.przychod} zł, ${r.godziny}h`),
     '',
     'LTV klientów:',
-    ...ltv.rows.map(r => `  ${r.klient}: ${r.ltv_total} zł (${r.status_klienta})`),
+    ...ltv.rows.map(r => `  ${r.klient}: ${r.ltv} zł (${r.status_klienta})`),
     '',
     `Zaległe faktury (${overdue.rows.length}):`,
     ...(overdue.rows.length
