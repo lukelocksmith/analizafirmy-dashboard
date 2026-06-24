@@ -1,7 +1,3 @@
-<svelte:head>
-  <script src="/chat-widget.js"></script>
-</svelte:head>
-
 # Przegląd — Important
 
 ```sql biezacy

@@ -22,6 +22,11 @@ ENV EVIDENCE_SOURCE__important_db__password=$EVIDENCE_SOURCE__important_db__pass
 RUN --network=host npm run sources
 RUN npm run build:strict
 
+# Inject chat widget into all pages post-build
+COPY static/chat-widget.js .evidence/template/build/chat-widget.js
+RUN find .evidence/template/build -name "*.html" -exec \
+    sed -i 's|</body>|<script src="/chat-widget.js"></script></body>|' {} \;
+
 FROM node:18-alpine AS runtime
 WORKDIR /app
 RUN npm install -g serve
