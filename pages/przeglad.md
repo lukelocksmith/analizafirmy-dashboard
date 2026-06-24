@@ -1,3 +1,46 @@
+<script>
+  import { tick } from 'svelte';
+
+  const CHAT_API = 'https://chat-api.important.is';
+
+  let chatOpen = false;
+  let msgs = [];
+  let inputVal = '';
+  let busy = false;
+  let msgsEl;
+
+  async function scrollBottom() {
+    await tick();
+    if (msgsEl) msgsEl.scrollTop = msgsEl.scrollHeight;
+  }
+
+  async function sendMsg() {
+    const q = inputVal.trim();
+    if (!q || busy) return;
+    inputVal = '';
+    msgs = [...msgs, { role: 'user', content: q }];
+    busy = true;
+    await scrollBottom();
+    try {
+      const r = await fetch(`${CHAT_API}/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: msgs })
+      });
+      const d = await r.json();
+      msgs = [...msgs, { role: 'assistant', content: d.answer || d.error || 'Błąd odpowiedzi' }];
+    } catch {
+      msgs = [...msgs, { role: 'assistant', content: 'Błąd połączenia z API.' }];
+    }
+    busy = false;
+    await scrollBottom();
+  }
+
+  function onKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+  }
+</script>
+
 # Przegląd — Important
 
 ```sql biezacy
@@ -176,3 +219,61 @@ ORDER BY billable_h DESC
     <Column id=utilization_pct title="Utilization %" fmt=num1/>
     <Column id=koszt_total title="Koszt PLN" fmt=num0/>
 </DataTable>
+
+<!-- Chat widget -->
+<div style="position:fixed;bottom:28px;right:28px;z-index:9999;font-family:system-ui,-apple-system,sans-serif">
+
+  {#if chatOpen}
+  <div style="position:absolute;bottom:72px;right:0;width:380px;height:500px;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.18);display:flex;flex-direction:column;overflow:hidden;border:1px solid #e2e8f0">
+
+    <!-- header -->
+    <div style="padding:14px 18px;background:#2563eb;color:#fff;display:flex;align-items:center;justify-content:space-between">
+      <span style="font-weight:600;font-size:15px">💬 Asystent finansowy</span>
+      <button on:click={() => chatOpen = false} style="background:none;border:none;color:#fff;cursor:pointer;font-size:20px;line-height:1;padding:0">×</button>
+    </div>
+
+    <!-- messages -->
+    <div bind:this={msgsEl} style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth">
+      <div style="background:#f1f5f9;border-radius:12px;padding:10px 14px;font-size:13.5px;color:#475569;max-width:90%">
+        Cześć! Pytaj o przychody, marże, zaległości, klientów, zespół — mam dostęp do aktualnych danych.
+      </div>
+      {#each msgs as m}
+        <div style="background:{m.role === 'user' ? '#2563eb' : '#f1f5f9'};color:{m.role === 'user' ? '#fff' : '#1e293b'};border-radius:12px;padding:10px 14px;font-size:13.5px;max-width:88%;align-self:{m.role === 'user' ? 'flex-end' : 'flex-start'};white-space:pre-wrap;line-height:1.5">
+          {m.content}
+        </div>
+      {/each}
+      {#if busy}
+        <div style="background:#f1f5f9;border-radius:12px;padding:10px 14px;font-size:13.5px;color:#94a3b8;max-width:60%">
+          Analizuję...
+        </div>
+      {/if}
+    </div>
+
+    <!-- input -->
+    <div style="padding:12px;border-top:1px solid #e2e8f0;display:flex;gap:8px;align-items:center">
+      <input
+        bind:value={inputVal}
+        on:keydown={onKey}
+        placeholder="Np. jaki był przychód w maju?"
+        disabled={busy}
+        style="flex:1;padding:9px 13px;border:1px solid #cbd5e1;border-radius:8px;font-size:13.5px;outline:none;background:{busy ? '#f8fafc' : '#fff'}"
+      />
+      <button
+        on:click={sendMsg}
+        disabled={busy}
+        style="padding:9px 16px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:15px;opacity:{busy ? '.5' : '1'}"
+      >→</button>
+    </div>
+  </div>
+  {/if}
+
+  <!-- toggle button -->
+  <button
+    on:click={() => chatOpen = !chatOpen}
+    style="width:56px;height:56px;border-radius:50%;background:#2563eb;color:#fff;border:none;cursor:pointer;font-size:22px;box-shadow:0 4px 16px rgba(37,99,235,.45);transition:transform .15s"
+    title="Asystent finansowy"
+  >
+    {chatOpen ? '✕' : '💬'}
+  </button>
+
+</div>
