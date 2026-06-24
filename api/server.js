@@ -1,6 +1,6 @@
 const express = require('express');
 const { Pool } = require('pg');
-const Anthropic = require('@anthropic-ai/sdk');
+const OpenAI = require('openai');
 const cors = require('cors');
 
 const app = express();
@@ -10,7 +10,7 @@ app.use(cors({ origin: origins }));
 app.use(express.json({ limit: '50kb' }));
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 async function buildContext() {
   const [pnl, clients, ltv, overdue, team] = await Promise.all([
@@ -84,16 +84,19 @@ app.post('/chat', async (req, res) => {
   try {
     const context = await buildContext();
 
-    const response = await anthropic.messages.create({
-      model: process.env.CLAUDE_MODEL || 'claude-haiku-4-5-20251001',
+    const response = await openai.chat.completions.create({
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
       max_tokens: 1200,
-      system: `Jesteś CFO agencji marketingowej Important. Odpowiadasz po polsku, konkretnie i rzeczowo — podajesz liczby z danych, nie ogólniki. Używaj zwięzłych odpowiedzi (max 3-4 zdania lub krótka lista). Jeśli pytanie wykracza poza dostępne dane, powiedz wprost.
-
-${context}`,
-      messages: messages.slice(-10).map(({ role, content }) => ({ role, content }))
+      messages: [
+        {
+          role: 'system',
+          content: `Jesteś CFO agencji marketingowej Important. Odpowiadasz po polsku, konkretnie i rzeczowo — podajesz liczby z danych, nie ogólniki. Używaj zwięzłych odpowiedzi (max 3-4 zdania lub krótka lista). Jeśli pytanie wykracza poza dostępne dane, powiedz wprost.\n\n${context}`
+        },
+        ...messages.slice(-10).map(({ role, content }) => ({ role, content }))
+      ]
     });
 
-    res.json({ answer: response.content[0].text });
+    res.json({ answer: response.choices[0].message.content });
   } catch (err) {
     console.error('Chat error:', err.message);
     res.status(500).json({ error: 'Błąd API — spróbuj ponownie' });
