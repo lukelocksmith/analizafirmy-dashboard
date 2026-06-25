@@ -27,11 +27,16 @@ COPY static/chat-widget.js .evidence/template/build/chat-widget.js
 RUN find .evidence/template/build -name "*.html" -exec \
     sed -i 's|</body>|<script src="/chat-widget.js"></script></body>|' {} \;
 
-FROM node:18-alpine AS runtime
-WORKDIR /app
-RUN npm install -g serve
+FROM nginx:alpine AS runtime
 
-COPY --from=builder /app/.evidence/template/build ./build
+COPY --from=builder /app/.evidence/template/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+ARG DASHBOARD_USER=important
+ARG DASHBOARD_PASSWORD=Adminimportant!
+RUN apk add --no-cache apache2-utils && \
+    htpasswd -bc /etc/nginx/.htpasswd "${DASHBOARD_USER}" "${DASHBOARD_PASSWORD}" && \
+    apk del apache2-utils
 
 EXPOSE 3000
-CMD ["serve", "build", "-l", "3000", "-s"]
+CMD ["nginx", "-g", "daemon off;"]
