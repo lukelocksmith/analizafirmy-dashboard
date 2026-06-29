@@ -24,17 +24,15 @@ ORDER BY miesiac DESC, godziny DESC
 <BigValue
   data={monthly_costs}
   value=koszty_godziny
-  title="Koszty czerwiec 2026 (PLN)"
+  title="Koszty bieżącego miesiąca (PLN)"
   fmt=num0
-  where="miesiac = '2026-06-01'"
 />
 
 <BigValue
   data={monthly_costs}
   value=suma_godzin
-  title="Godziny czerwiec 2026"
+  title="Godziny bieżącego miesiąca"
   fmt=num1
-  where="miesiac = '2026-06-01'"
 />
 
 ## Koszty miesięczne (godziny × stawka)
@@ -47,7 +45,7 @@ ORDER BY miesiac DESC, godziny DESC
   yAxisTitle="PLN"
 />
 
-## Godziny per osoba
+## Godziny per osoba — bieżący miesiąc
 
 ```sql current_month_by_person
 SELECT
@@ -56,11 +54,11 @@ SELECT
     godziny,
     koszt_pln
 FROM v_monthly_hours
-WHERE miesiac >= '2026-06-01' AND miesiac < '2026-07-01'
+WHERE miesiac = date_trunc('month', current_date)
 ORDER BY godziny DESC
 ```
 
-<DataTable data={current_month_by_person} title="Czerwiec 2026 — godziny per osoba">
+<DataTable data={current_month_by_person} title="Bieżący miesiąc — godziny per osoba">
   <Column id=ekspert title="Osoba"/>
   <Column id=stawka title="Stawka/h" fmt=num0/>
   <Column id=godziny title="Godziny" fmt=num1/>
@@ -75,13 +73,13 @@ SELECT
     przestrzen,
     SUM(godziny) AS godziny_total
 FROM v_monthly_hours_by_project
-WHERE miesiac >= '2026-04-01'
+WHERE miesiac >= date_trunc('month', current_date) - INTERVAL 2 MONTHS
 GROUP BY projekt, przestrzen
 ORDER BY godziny_total DESC
 LIMIT 15
 ```
 
-<DataTable data={recent_projects} title="Projekty kwiecień–czerwiec 2026">
+<DataTable data={recent_projects} title="Projekty — ostatnie 3 miesiące">
   <Column id=projekt title="Projekt/Lista"/>
   <Column id=przestrzen title="Space"/>
   <Column id=godziny_total title="Godziny" fmt=num1/>

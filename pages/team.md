@@ -26,7 +26,7 @@ SELECT
     utilization_pct,
     koszt_total
 FROM v_team_utilization
-WHERE miesiac >= '2026-01-01'
+WHERE miesiac >= date_trunc('year', current_date)
 ORDER BY miesiac DESC, billable_h DESC
 ```
 
@@ -40,7 +40,7 @@ SELECT
     ROUND(SUM(billable_h) / SUM(total_h) * 100, 1) AS utilization_pct,
     SUM(koszt_total) AS koszt_total
 FROM v_team_utilization
-WHERE miesiac >= '2026-01-01'
+WHERE miesiac >= date_trunc('year', current_date)
 GROUP BY miesiac, miesiac_label
 ORDER BY miesiac DESC
 ```

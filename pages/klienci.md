@@ -85,6 +85,31 @@ FROM v_client_ltv
     <Column id=aktywne_miesiace title="Mies. aktywny"/>
 </DataTable>
 
+## Terminowość płatności (DSO)
+
+```sql dso
+SELECT
+    klient,
+    liczba_faktur,
+    avg_dni_vs_termin,
+    min_dni,
+    max_dni,
+    faktur_spoznionych,
+    pct_spoznionych
+FROM v_dso
+ORDER BY avg_dni_vs_termin DESC
+```
+
+<DataTable data={dso} title="Terminowość płatności per klient">
+    <Column id=klient title="Klient"/>
+    <Column id=liczba_faktur title="Faktur"/>
+    <Column id=avg_dni_vs_termin title="Avg dni (- = przed terminem)" fmt=num1/>
+    <Column id=min_dni title="Min dni" fmt=num0/>
+    <Column id=max_dni title="Max dni" fmt=num0/>
+    <Column id=faktur_spoznionych title="Spóźnionych"/>
+    <Column id=pct_spoznionych title="% spóźn." fmt=num0/>
+</DataTable>
+
 ## Trend przychodów — top klienci
 
 ```sql client_trend

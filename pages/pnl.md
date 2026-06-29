@@ -15,7 +15,11 @@ ORDER BY miesiac DESC
 ```
 
 ```sql pnl_last_month
-SELECT * FROM v_monthly_pnl
+SELECT
+    *,
+    ROUND(marza_brutto * 0.91, 0) AS est_zysk_netto_pln,
+    ROUND(marza_procent * 0.91, 1) AS est_zysk_netto_pct
+FROM v_monthly_pnl
 WHERE miesiac = (SELECT MAX(miesiac) FROM v_monthly_pnl)
 ```
 
@@ -49,6 +53,48 @@ WHERE miesiac = (SELECT MAX(miesiac) FROM v_monthly_pnl WHERE miesiac < (SELECT 
   data={pnl_last_month}
   value=marza_procent
   title="Marża %"
+  fmt=num1
+/>
+
+<BigValue
+  data={pnl_last_month}
+  value=est_zysk_netto_pln
+  title="Est. zysk netto PLN (po 9% CIT)"
+  fmt=num0
+/>
+
+<BigValue
+  data={pnl_last_month}
+  value=est_zysk_netto_pct
+  title="Est. zysk netto %"
+  fmt=num1
+/>
+
+```sql prognoza_pnl
+SELECT prognoza_przychod, prognoza_koszt, prognoza_marza, prognoza_marza_pct
+FROM v_forecast
+```
+
+## Prognoza następnego miesiąca
+
+<BigValue
+  data={prognoza_pnl}
+  value=prognoza_przychod
+  title="Prognozowany przychód"
+  fmt=num0
+/>
+
+<BigValue
+  data={prognoza_pnl}
+  value=prognoza_marza
+  title="Prognozowana marża PLN"
+  fmt=num0
+/>
+
+<BigValue
+  data={prognoza_pnl}
+  value=prognoza_marza_pct
+  title="Prognozowana marża %"
   fmt=num1
 />
 

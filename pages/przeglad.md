@@ -70,6 +70,32 @@ WHERE miesiac = (SELECT MAX(miesiac) FROM v_team_utilization)
     fmt=num1
 />
 
+```sql prognoza
+SELECT prognoza_przychod, prognoza_koszt, prognoza_marza, prognoza_marza_pct, prognoza_godziny
+FROM v_forecast
+```
+
+<BigValue
+    data={prognoza}
+    value=prognoza_przychod
+    title="Prognoza przychodu (nast. mies.)"
+    fmt=num0
+/>
+
+<BigValue
+    data={prognoza}
+    value=prognoza_marza
+    title="Prognoza marży PLN"
+    fmt=num0
+/>
+
+<BigValue
+    data={prognoza}
+    value=prognoza_marza_pct
+    title="Prognoza marży %"
+    fmt=num1
+/>
+
 ---
 
 ## ⚠️ Do zrobienia teraz
